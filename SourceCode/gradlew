@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -eu
+GRADLE_VERSION=8.13
+GRADLE_HOME_LOCAL="$HOME/.gradle/manual-dists/gradle-$GRADLE_VERSION"
+if [ ! -x "$GRADLE_HOME_LOCAL/bin/gradle" ]; then
+  mkdir -p "$HOME/.gradle/manual-dists"
+  ZIP="$HOME/.gradle/manual-dists/gradle-$GRADLE_VERSION-bin.zip"
+  echo "Downloading Gradle $GRADLE_VERSION..."
+  curl -fL "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip" -o "$ZIP"
+  unzip -q -o "$ZIP" -d "$HOME/.gradle/manual-dists"
+  rm -f "$ZIP"
+fi
+exec "$GRADLE_HOME_LOCAL/bin/gradle" "$@"
