@@ -73,21 +73,3 @@ UTHTodo/
 
 Dữ liệu tiêu đề và mô tả được trả về từ `DefaultOnboardingRepository`. Các chuỗi dùng chung nằm trong `AppContent`. Màu giao diện được gom trong `AppColors`. Logo và kiểu chữ thương hiệu được tái sử dụng từ `BrandComponents.kt`.
 
-## Mở project bằng Android Studio
-
-1. Giải nén `UTHTodo_AndroidStudio.zip`.
-2. Mở Android Studio → **Open**.
-3. Chọn thư mục `UTHTodo` vừa giải nén (thư mục có `settings.gradle.kts`).
-4. Chờ Gradle Sync hoàn tất. Máy cần có JDK 17 và Android SDK Platform 36.
-5. Nếu Android Studio hỏi cài Android SDK 36 hoặc Build Tools, chọn **Install**.
-6. Mở Device Manager, chạy một máy ảo Android hoặc kết nối điện thoại.
-7. Chọn cấu hình `app`, nhấn **Run ▶**.
-
-Lần build đầu tiên cần Internet để tải Gradle và các thư viện AndroidX/Compose.
-
-## Lưu ý
-
-- Package: `com.example.uthtodo`.
-- Application ID: `com.example.uthtodo`.
-- Giao diện được dựng bằng Jetpack Compose và hình minh họa vẽ bằng các thành phần Compose; không cần tải ảnh minh họa ngoài.
-- Bản này tập trung đúng phần Splash + Onboarding trong ảnh tham khảo, chưa thêm chức năng quản lý danh sách công việc vì chưa có thiết kế màn hình đó.
