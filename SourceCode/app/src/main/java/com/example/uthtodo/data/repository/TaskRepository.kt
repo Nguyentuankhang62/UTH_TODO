@@ -1,18 +1,25 @@
 package com.example.uthtodo.data.repository
 
+import android.util.Log
 import com.example.uthtodo.data.model.SubTask
 import com.example.uthtodo.data.model.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.tasks.await
 
 class TaskRepository {
 
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private var firestoreListener: ListenerRegistration? = null
+    private var activeUserId: String? = null
+
+    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        listenToUserTasks(firebaseAuth.currentUser?.uid)
+    }
 
     private val initialTasks = listOf(
         Task(
@@ -105,6 +112,37 @@ class TaskRepository {
     private val _tasksFlow = MutableStateFlow<List<Task>>(initialTasks)
     val tasksFlow: StateFlow<List<Task>> = _tasksFlow.asStateFlow()
 
+    init {
+        auth.addAuthStateListener(authStateListener)
+    }
+
+    private fun listenToUserTasks(userId: String?) {
+        if (userId == activeUserId) return
+
+        firestoreListener?.remove()
+        firestoreListener = null
+        activeUserId = userId
+        _tasksFlow.value = initialTasks
+
+        if (userId == null) return
+
+        firestoreListener = db.collection("users")
+            .document(userId)
+            .collection("tasks")
+            .addSnapshotListener { snapshot, error ->
+                if (activeUserId != userId) return@addSnapshotListener
+                if (error != null) {
+                    Log.e(TAG, "Unable to listen to the user's tasks", error)
+                    return@addSnapshotListener
+                }
+                if (snapshot == null) return@addSnapshotListener
+
+                _tasksFlow.value = snapshot.documents.mapNotNull { document ->
+                    document.data?.let { Task.fromMap(it + ("id" to document.id)) }
+                }
+            }
+    }
+
     fun getTaskById(taskId: String): Task? {
         return _tasksFlow.value.find { it.id == taskId }
     }
@@ -112,8 +150,7 @@ class TaskRepository {
     fun toggleTaskDone(taskId: String) {
         val updated = _tasksFlow.value.map { task ->
             if (task.id == taskId) {
-                val newDone = !task.done
-                task.copy(done = newDone)
+                task.copy(done = !task.done)
             } else {
                 task
             }
@@ -185,21 +222,24 @@ class TaskRepository {
 
     fun deleteTask(taskId: String) {
         _tasksFlow.value = _tasksFlow.value.filterNot { it.id == taskId }
-        try {
-            val userId = auth.currentUser?.uid ?: "anonymous_user"
-            db.collection("users").document(userId).collection("tasks").document(taskId).delete()
-        } catch (_: Exception) {
-            // Safe fallback if Firebase is not configured online
-        }
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).collection("tasks").document(taskId).delete()
+            .addOnFailureListener { error ->
+                Log.e(TAG, "Unable to delete task $taskId from Firestore", error)
+            }
     }
 
     private fun syncToFirebase(taskId: String) {
-        try {
-            val userId = auth.currentUser?.uid ?: "anonymous_user"
-            val task = getTaskById(taskId) ?: return
-            db.collection("users").document(userId).collection("tasks").document(taskId).set(task)
-        } catch (_: Exception) {
-            // Safe fallback when Firebase offline
-        }
+        val userId = auth.currentUser?.uid ?: return
+        val task = getTaskById(taskId) ?: return
+        db.collection("users").document(userId).collection("tasks").document(taskId)
+            .set(task.toMap())
+            .addOnFailureListener { error ->
+                Log.e(TAG, "Unable to save task $taskId to Firestore", error)
+            }
+    }
+
+    private companion object {
+        const val TAG = "TaskRepository"
     }
 }
