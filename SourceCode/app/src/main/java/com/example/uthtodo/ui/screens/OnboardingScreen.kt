@@ -1,33 +1,21 @@
+
 package com.example.uthtodo.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,106 +32,131 @@ fun OnboardingScreen(
 ) {
     if (pages.isEmpty()) return
 
-    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    var currentIndex by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+
     val page = pages[currentIndex.coerceIn(pages.indices)]
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.Background)
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .background(Color.White)
+            .padding(
+                horizontal = 20.dp,
+                vertical = 16.dp
+            )
     ) {
-        // Logo UTH Todo hai màu giống bộ nhận diện trong ảnh.
+
+        // HEADER
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp),
+                .height(38.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             AppLogoMark(size = 23.dp)
-            Spacer(modifier = Modifier.width(7.dp))
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             AppWordmark(fontSize = 14.sp)
+
             Spacer(modifier = Modifier.weight(1f))
 
             TextButton(
                 onClick = onFinished,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    horizontal = 4.dp,
-                    vertical = 0.dp
+                contentPadding = PaddingValues(
+                    horizontal = 5.dp,
+                    vertical = 4.dp
                 )
             ) {
                 Text(
                     text = AppContent.SKIP,
-                    color = AppColors.TextSecondary,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight.Normal
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF777777),
+                    letterSpacing = 0.sp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        // KHOẢNG CÁCH PHÍA TRÊN MINH HỌA
+        Spacer(modifier = Modifier.weight(0.8f))
 
-        // Minh họa đặt chính giữa vùng phía trên tiêu đề như ảnh tham khảo.
+        // ILLUSTRATION
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(178.dp),
+                .height(175.dp),
             contentAlignment = Alignment.Center
         ) {
             page.illustration.Draw()
         }
 
-        Spacer(modifier = Modifier.weight(0.72f))
+        // KHOẢNG CÁCH GIỮA MINH HỌA VÀ NỘI DUNG
+        Spacer(modifier = Modifier.weight(0.7f))
 
+        // TITLE
         Text(
             text = page.title,
-            modifier = Modifier.widthIn(max = 250.dp),
-            color = AppColors.TextPrimary,
-            fontSize = 19.sp,
-            lineHeight = 24.sp,
-            letterSpacing = (-0.3).sp,
-            fontWeight = FontWeight.Bold
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF1C1C1E),
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 20.sp,
+            lineHeight = 25.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.4).sp
         )
 
         Spacer(modifier = Modifier.height(9.dp))
 
+        // DESCRIPTION
         Text(
             text = page.description,
-            modifier = Modifier.widthIn(max = 300.dp),
-            color = AppColors.TextSecondary,
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF66666D),
+            fontFamily = FontFamily.SansSerif,
             fontSize = 12.sp,
-            lineHeight = 17.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Normal,
             letterSpacing = 0.sp
         )
 
-        Spacer(modifier = Modifier.height(27.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
+        // PAGE INDICATOR
         PageIndicator(
             pageCount = pages.size,
             selectedIndex = currentIndex
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
+        // BUTTON
         Button(
             onClick = {
                 if (currentIndex < pages.lastIndex) {
-                    currentIndex += 1
+                    currentIndex++
                 } else {
                     onFinished()
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
+                .height(46.dp),
             shape = RoundedCornerShape(9.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = AppColors.Primary,
+                containerColor = Color(0xFF2F5BEA),
                 contentColor = Color.White
             ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp
+            )
         ) {
+
             Text(
                 text = if (currentIndex == pages.lastIndex) {
                     AppContent.START_NOW
@@ -151,9 +164,10 @@ fun OnboardingScreen(
                     AppContent.CONTINUE
                 },
                 fontSize = 13.sp,
-                lineHeight = 16.sp,
+                lineHeight = 18.sp,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.sp
+                letterSpacing = 0.1.sp
             )
         }
     }
@@ -168,19 +182,21 @@ private fun PageIndicator(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
+
         repeat(pageCount) { index ->
+
             Box(
                 modifier = Modifier
-                    .size(
-                        width = if (index == selectedIndex) 18.dp else 6.dp,
-                        height = 6.dp
+                    .width(
+                        if (index == selectedIndex) 17.dp else 6.dp
                     )
+                    .height(6.dp)
                     .clip(CircleShape)
                     .background(
                         if (index == selectedIndex) {
-                            AppColors.Primary
+                            Color(0xFF2F5BEA)
                         } else {
-                            AppColors.IndicatorInactive
+                            Color(0xFFD9DDE4)
                         }
                     )
             )
